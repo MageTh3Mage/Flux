@@ -176,13 +176,13 @@ typedef struct {
 
 typedef struct {
 	float M[4][4];
-} FMatrix;
+} FMatrix2;
 
 typedef struct {
 	FVector ViewOrigin;
 	char _padding_0[4];
-	FMatrix ViewRotationMatrix;
-	FMatrix ProjectionMatrix;
+	FMatrix2 ViewRotationMatrix;
+	FMatrix2 ProjectionMatrix;
 } FSceneViewProjectionData;
 
 struct FQuat

@@ -5,18 +5,14 @@ namespace settings {
     inline bool v_sync = false; 
     inline bool enableOnScreenESP = false;
     inline bool aimbot = true;    
-    inline int fov = 200;  
-    inline int aimkeybind = 0x02;  
+    inline int fov = 400;  
+    inline int aimkeybind = 0x05;  
     inline int smoothing = 5.0f;
     inline int delay = 0;
     inline int offset = 0;
-    inline bool TeamCheck = false;
+    inline bool TeamCheck = true;
     inline bool VisCheck = true;
     inline bool ClosestBone = false;
-    inline bool head = false;
-    inline bool neck = false;
-    inline bool chest = false;
-    inline bool pelvis = false;
 }
 
 namespace esp_settings {
@@ -28,4 +24,5 @@ namespace esp_settings {
     inline bool skeleton = true;
     inline bool distance = true;
     inline bool radar = true;
+    inline bool platform = true;
 }

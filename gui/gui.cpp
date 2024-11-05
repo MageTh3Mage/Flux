@@ -1,5 +1,6 @@
 #include "gui.h"
 #include <windows.h>
+
 ID3D11Device* g_pd3dDevice = nullptr;
 ID3D11DeviceContext* g_pd3dDeviceContext = nullptr;
 IDXGISwapChain* g_pSwapChain = nullptr;
@@ -254,7 +255,7 @@ void ShowMenuWithSidebar()
     ImVec4 textColor = ImVec4(1, 1, 1, 1); // Use ESP color
     if (esp_settings::esp) {
         for (uint32_t i = 0; i < globals::Num; i++) {
-            if (cache::privates[i] == globals::LocalPawn || cache::headpos[i].x == 0 || cache::headpos[i].y == 0) continue;
+            //if (cache::privates[i] == globals::LocalPawn || cache::headpos[i].x == 0 || cache::headpos[i].y == 0) continue;
             if (cache::allBoneW2S[i][0].x == 0 && cache::allBoneW2S[i][1].x == 0 && cache::allBoneW2S[i][2].x == 0 && cache::allBoneW2S[i][14].x == 0) continue;
             //if (cache::players[i] == (uintptr_t)nullptr) continue;
             //if (cache::privates[i] == (uintptr_t)nullptr) continue;
@@ -311,6 +312,32 @@ void ShowMenuWithSidebar()
                 strcpy_s(charArray2, cache::weaponName[i].c_str());
                 ImGui::GetBackgroundDrawList()->AddText({ float(cache::allBoneW2S[i][0].x - (ImGui::CalcTextSize(charArray2)[0] / 2)), float(cache::allBoneW2S[i][0].y - ImGui::CalcTextSize(charArray)[1] - ImGui::CalcTextSize(charArray2)[1]) }, ImGui::GetColorU32(tierColor), charArray2);
             }
+            if (esp_settings::platform) {
+                std::wstring balls_sus(cache::platform[i]);
+                std::string str_platform(balls_sus.begin(), balls_sus.end());
+                //std::cout << str_platform << std::endl;
+                float posX = float(cache::allBoneW2S[i][0].x - (ImGui::CalcTextSize(str_platform.c_str()).x / 2));
+                float posY = float(cache::allBoneW2S[i][14].y + ImGui::CalcTextSize(str_platform.c_str()).y / 2) + 20;
+                ImVec4 color;
+
+                if (str_platform.find("XBL") != std::string::npos || str_platform.find("XSX") != std::string::npos) {
+                    color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
+                }
+                else if (str_platform.find("PSN") != std::string::npos || str_platform.find("PS4/PS5") != std::string::npos) {
+                    color = ImVec4(0.0f, 0.0f, 1.0f, 1.0f); // Blue
+                }
+                else if (str_platform.find("WIN") != std::string::npos) {
+                    color = ImVec4(0.0f, 1.0f, 1.0f, 1.0f); // Sky Blue
+                }
+                else if (str_platform.find("SWH") != std::string::npos) {
+                    color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red
+                }
+                //else {
+                //    return; // No valid platform found, exit early
+                //}
+
+                ImGui::GetBackgroundDrawList()->AddText({ posX, posY }, ImGui::GetColorU32(color), str_platform.c_str());
+            }
 
         }
 
@@ -358,7 +385,7 @@ void ShowMenuWithSidebar()
     ImVec2 cr3StatusPosition = ImVec2(10.0f, 30.0f); // Below the FPS text
 
     // Determine the status text and color based on cr3Fixed
-    const char* cr3StatusText = globals::CR3Fixed ? "Hyzr DMA" : "Hyzr DMA";
+    const char* cr3StatusText = globals::CR3Fixed ? "Mystic" : "Mystic";
     ImColor cr3StatusColor = globals::CR3Fixed ? ImColor(0, 255, 0, 255) : ImColor(255, 0, 0, 255); // Green for fixed, red for not fixed
 
     // Draw the CR3 status text

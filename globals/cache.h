@@ -17,6 +17,8 @@ namespace cache{
 	inline uintptr_t Weapon[1000] = {};
 	inline uint64_t ftext_ptr[1000] = {};
 	inline uint64_t ftext_data[1000] = {};
+	inline uint64_t testPlatform[1000] = {};
+	inline wchar_t platform[1000][64] = {};
 	inline int ftext_length[1000] = {};
 	inline std::string weaponName[1000] = {};
 	inline int32_t ammo[1000] = {};
