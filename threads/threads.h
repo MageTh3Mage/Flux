@@ -19,14 +19,9 @@ void aimbot();
 void esp();
 
 void triggerbot();
+
 void getAllWeaponNames();
 
 void nameesp();
 
 void cr3Fix();
-
-//void readWeapon();
-
-//void weaponName(int i);
-
-//void OnScreen();

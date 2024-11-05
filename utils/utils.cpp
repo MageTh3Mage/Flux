@@ -3,6 +3,87 @@
 #include "offsets.h"
 #include "globals.h"
 #include "Memory.h"
+struct FPlane : Vector3
+{
+	double W;
+
+	FPlane() : W(0) { }
+	FPlane(double W) : W(W) { }
+};
+
+class FMatrix
+{
+public:
+	double m[4][4];
+	FPlane XPlane, YPlane, ZPlane, WPlane;
+
+	FMatrix() : XPlane(), YPlane(), ZPlane(), WPlane() { }
+	FMatrix(FPlane XPlane, FPlane YPlane, FPlane ZPlane, FPlane WPlane)
+		: XPlane(XPlane), YPlane(YPlane), ZPlane(ZPlane), WPlane(WPlane) { }
+};
+
+inline double RadiansToDegrees(double dRadians)
+{
+	return dRadians * (180.0 / M_PI);
+}
+
+template< typename t >
+class TArray
+{
+public:
+
+	TArray() : tData(), iCount(), iMaxCount() { }
+	TArray(t* data, int count, int max_count) :
+		tData(tData), iCount(iCount), iMaxCount(iMaxCount) { }
+
+public:
+
+	auto Get(int idx) -> t
+	{
+		return mem.Read< t >(reinterpret_cast<__int64>(this->tData) + (idx * sizeof(t)));
+	}
+
+	auto Size() -> std::uint32_t
+	{
+		return this->iCount;
+	}
+
+	bool IsValid()
+	{
+		return this->iCount != 0;
+	}
+
+	t* tData;
+	int iCount;
+	int iMaxCount;
+};
+
+auto GetViewState() -> uintptr_t
+{
+	TArray<uintptr_t> ViewState = mem.Read<TArray<uintptr_t>>(globals::Localplayer + 0xD0);
+	//std::cout << ViewState.Get(1) << std::endl;
+	return ViewState.Get(1);
+}
+
+void get_view_point()
+{
+	uintptr_t ViewState = GetViewState();
+	CameraInfo view_point;
+	auto mProjection = mem.Read<FMatrix>(ViewState + 0x900);
+	view_point.rotation.x = RadiansToDegrees(std::asin(mProjection.ZPlane.W));
+	view_point.rotation.y = RadiansToDegrees(std::atan2(mProjection.YPlane.W, mProjection.XPlane.W));
+	view_point.rotation.z = 0.0;
+
+	view_point.location.x = mProjection.m[3][0];
+	view_point.location.y = mProjection.m[3][1];
+	view_point.location.z = mProjection.m[3][2];
+	float FieldOfView = atanf(1 / mem.Read<double>(ViewState + 0x700)) * 2;
+	view_point.fov = (FieldOfView) * (180.f / M_PI); 
+	/*std::cout << "X: " << view_point.rotation.x << std::endl;
+	std::cout << "Y: " << view_point.rotation.y << std::endl;
+	std::cout << "Z: " << view_point.rotation.z << std::endl;*/
+	viewInfo = view_point;
+}
 
 void GetCameraInfo()
 {
@@ -59,7 +140,7 @@ bool IsVisible(uintptr_t mesh)
 	float LastRenderTimeOnScreen = 0;
 	VMMDLL_SCATTER_HANDLE scatterHandle = mem.CreateScatterHandle();
 	mem.AddScatterReadRequest(scatterHandle, mesh + offsets::LastSubmitTime, &LastSumbitTime, sizeof(float));
-	mem.AddScatterReadRequest(scatterHandle, mesh + offsets::LastRenderTimeOnScreen, &LastRenderTimeOnScreen, sizeof(float));
+	mem.AddScatterReadRequest(scatterHandle, mesh + offsets::LastSubmitTime, &LastRenderTimeOnScreen, sizeof(float));
 	mem.ExecuteReadScatter(scatterHandle);
 	bool Visible = LastRenderTimeOnScreen - LastSumbitTime <= 0.3;
 	return Visible;

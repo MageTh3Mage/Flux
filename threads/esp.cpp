@@ -126,7 +126,7 @@ void nameesp() {
 			if (cache::players[i] == (uintptr_t)nullptr) continue;
 			if (cache::privates[i] == (uintptr_t)nullptr) continue;
 			if (cache::privates[i] == globals::LocalPawn) {
-				//localTeam = cachedTeam[i];
+				cache::localteam = cache::team[i];
 				continue;
 			}
 			if (cache::meshes[i] == (uintptr_t)nullptr) continue;
@@ -148,11 +148,7 @@ void weaponName(int i) {
 
 }
 
-
 void esp() {
-	if (settings::enableOnScreenESP) {
-		ConnectOnScreen("tcp://192.168.1.244:5858");
-	};
 	while (true) {
 		if (globals::u_world == (uintptr_t)nullptr) {
 			continue;
@@ -184,7 +180,7 @@ void esp() {
 		for (uint32_t i = 0; i < globals::Num; i++) {
 			if (cache::players[i] == (uintptr_t)nullptr) continue;
 			mem.AddScatterReadRequest(privateHandle, (cache::players[i] + offsets::Private), &cache::privates[i], sizeof(uintptr_t));
-			mem.AddScatterReadRequest(privateHandle, (cache::players[i] + 0x1201), &cache::team[i], sizeof(uintptr_t));
+			mem.AddScatterReadRequest(privateHandle, (cache::players[i] + offsets::TeamId), &cache::team[i], sizeof(uintptr_t));
 		}
 		mem.ExecuteReadScatter(privateHandle);
 		VMMDLL_Scatter_CloseHandle(privateHandle);
@@ -205,9 +201,10 @@ void esp() {
 		VMMDLL_SCATTER_HANDLE arrayHandle = mem.CreateScatterHandle();
 		for (int i = 0; i < globals::Num; i++) {
 			if (cache::meshes[i] == (uint64_t)nullptr) continue;
+			
 			mem.AddScatterReadRequest(arrayHandle, (cache::meshes[i] + offsets::BoneArray), &cache::boneArray[i], sizeof(uint64_t));
 			mem.AddScatterReadRequest(arrayHandle, (cache::meshes[i] + offsets::ComponetToWorld), &cache::componentToWorld[i], sizeof(FTransform));
-			mem.AddScatterReadRequest(arrayHandle, (cache::privates[i] + 0x9d8), &cache::cachedWd[i], sizeof(uintptr_t)); // https://dumpspace.spuckwaffel.com/Games/?hash=6b77eceb&type=classes&idx=AFortPawn&member=CurrentWeapon
+			mem.AddScatterReadRequest(arrayHandle, (cache::privates[i] + offsets::CurrentWeapon), &cache::cachedWd[i], sizeof(uintptr_t)); // https://dumpspace.spuckwaffel.com/Games/?hash=6b77eceb&type=classes&idx=AFortPawn&member=CurrentWeapon
 		}
 		mem.ExecuteReadScatter(arrayHandle);
 		VMMDLL_Scatter_CloseHandle(arrayHandle);
@@ -218,8 +215,8 @@ void esp() {
 			if (cache::cachedWd[i] != (uint64_t)nullptr)
 			{
 				//mem.AddScatterReadRequest(slekeHandle, (cache::cachedWd[i] + 0xedc), &cachedWeaponAmmo[i], sizeof(int32_t));
-				mem.AddScatterReadRequest(arrayHandle2, (cache::cachedWd[i] + 0xf1c), &cache::ammo[i], sizeof(int32_t)); // https://dumpspace.spuckwaffel.com/Games/?hash=6b77eceb&type=classes&idx=AFortWeapon&member=AmmoCount
-				mem.AddScatterReadRequest(arrayHandle2, (cache::cachedWd[i] + 0x520), &cache::Weapon[i], sizeof(uint64_t)); // https://dumpspace.spuckwaffel.com/Games/?hash=6b77eceb&type=classes&idx=AFortWeapon&member=WeaponData
+				mem.AddScatterReadRequest(arrayHandle2, (cache::cachedWd[i] + offsets::AmmoCount), &cache::ammo[i], sizeof(int32_t)); // https://dumpspace.spuckwaffel.com/Games/?hash=6b77eceb&type=classes&idx=AFortWeapon&member=AmmoCount
+				mem.AddScatterReadRequest(arrayHandle2, (cache::cachedWd[i] + offsets::WeaponData), &cache::Weapon[i], sizeof(uint64_t)); // https://dumpspace.spuckwaffel.com/Games/?hash=6b77eceb&type=classes&idx=AFortWeapon&member=WeaponData
 			}
 			if (cache::boneArray[i] == (uint64_t)nullptr) mem.AddScatterReadRequest(arrayHandle2, (cache::meshes[i] + offsets::BoneArray), &cache::boneArray[i], sizeof(uint64_t));
 		}
@@ -254,7 +251,7 @@ void esp() {
 		VMMDLL_Scatter_CloseHandle(slekeHandle);
 
 
-		GetCameraInfo();
+		get_view_point();
 		closestPlayer::closest_distance_from_center = FLT_MAX;
 		int closestPlayerIndex = FLT_MAX;
 		for (uint32_t i = 0; i < globals::Num; i++) {
@@ -268,6 +265,7 @@ void esp() {
 			if (cache::players[i] == (uintptr_t)nullptr) continue;
 			if (cache::privates[i] == (uintptr_t)nullptr) continue;
 			if (cache::privates[i] == globals::LocalPawn) {
+				//std::cout << "local player" << std::endl;
 				//if (cache::tier[i] == 4) {
 				//	std::cout << p << std::endl;
 				//	p = p - 2;
@@ -285,16 +283,16 @@ void esp() {
 				////globals::localTeam = cache::team[i];
 
 				//for (int x = 0; x < 10000; x += 4) {
-				//	if (mem.Read<float>(cache::cachedWd[i] + x) == 3.f) { // drum gun gravity
-				//	    std::cout << std::hex << x << "\n"; // 0x1f34
-				//	}
+				//	//if (mem.Read<float>(cache::cachedWd[i] + x) == 3.f) { // drum gun gravity
+				//	//    std::cout << std::hex << x << "\n"; // 0x1f34
+				//	//}
 				//	if (mem.Read<float>(cache::cachedWd[i] + x) == 80000.f) { // nemesis ar bullet speed
 				//		std::cout << std::hex << x << "\n"; // 0x1cc4
 				//		// 0x1f30
 				//	}
 				//}
 
-				cache::localteam = cache::team[i];
+				//cache::localteam = cache::team[i];
 				D3DMATRIX matrix = MatrixMultiplication(cache::allBoneTransform[i][0].ToMatrixWithScale(), cache::componentToWorld[i].ToMatrixWithScale());
 				Vector3 bonePositions[15] = {};
 				bonePositions[0] = Vector3(matrix._41, matrix._42, matrix._43);
@@ -309,10 +307,11 @@ void esp() {
 			if (cache::team[i] == globals::localTeam) continue;
 			if (cache::meshes[i] == (uintptr_t)nullptr) continue;
 			
-
+				
 			D3DMATRIX matrix = MatrixMultiplication(cache::allBoneTransform[i][0].ToMatrixWithScale(), cache::componentToWorld[i].ToMatrixWithScale());
 			Vector3 bonePositions[15] = {};
 			bonePositions[0] = Vector3(matrix._41, matrix._42, matrix._43);
+			//std::cout << bonePositions[0].z << std::endl;
 			//bonePositions[15] = Vector3(matrix2._41, matrix2._42, matrix2._43);
 			Vector3 Headpos = bonePositions[0];
 			cache::headpos[i] = Headpos;
@@ -383,12 +382,28 @@ void esp() {
 
 void getAllWeaponNames() {
 	while (true) {
+		VMMDLL_SCATTER_HANDLE testPlat = mem.CreateScatterHandle();
+		for (uint32_t i = 0; i < globals::Num; i++) {
+			if (cache::players[i] == (uintptr_t)nullptr) continue;
+			mem.AddScatterReadRequest(testPlat, (cache::players[i] + offsets::Platform), &cache::testPlatform[i], sizeof(uint64_t));
+		}
+		mem.ExecuteReadScatter(testPlat);
+		VMMDLL_Scatter_CloseHandle(testPlat);
+		VMMDLL_SCATTER_HANDLE readPlat = mem.CreateScatterHandle();
+		for (uint32_t i = 0; i < globals::Num; i++) {
+			if (cache::testPlatform[i] == (uintptr_t)nullptr) continue;
+			mem.AddScatterReadRequest(readPlat, (cache::testPlatform[i]), &cache::platform[i], sizeof(wchar_t[64])); // https://dumpspace.spuckwaffel.com/Games/?hash=6b77eceb&type=classes&idx=AFortWeapon&member=AmmoCount
+
+		}
+		mem.ExecuteReadScatter(readPlat);
+		VMMDLL_Scatter_CloseHandle(readPlat);
+
 		VMMDLL_SCATTER_HANDLE ftext_ptrHandle = mem.CreateScatterHandle();
 		for (uint32_t i = 0; i < globals::Num; i++) {
 			if (cache::Weapon[i] == (uintptr_t)nullptr) continue;
 			uint64_t wdata = cache::Weapon[i];
-			mem.AddScatterReadRequest(ftext_ptrHandle, (wdata + 0xa2), &cache::tier[i], sizeof(BYTE)); // https://dumpspace.spuckwaffel.com/Games/?hash=6b77eceb&type=classes&idx=UFortItemDefinition&member=Rarity
-			mem.AddScatterReadRequest(ftext_ptrHandle, (wdata + 0x40), &cache::ftext_ptr[i], sizeof(uint64_t));
+			mem.AddScatterReadRequest(ftext_ptrHandle, (wdata + offsets::Rarity), &cache::tier[i], sizeof(BYTE));
+			mem.AddScatterReadRequest(ftext_ptrHandle, (wdata + offsets::ItemName), &cache::ftext_ptr[i], sizeof(uint64_t)); 
 		}
 		mem.ExecuteReadScatter(ftext_ptrHandle);
 		VMMDLL_Scatter_CloseHandle(ftext_ptrHandle);
@@ -404,10 +419,11 @@ void getAllWeaponNames() {
 		VMMDLL_SCATTER_HANDLE bulletHandle = mem.CreateScatterHandle();
 		for (uint32_t i = 0; i < globals::Num; i++) {
 			if (cache::privates[i] == globals::LocalPawn) {
-				uintptr_t wdata = mem.Read<uintptr_t>(cache::privates[i] + 0x9d8);
-				mem.AddScatterReadRequest(bulletHandle, (wdata + 0x1cc4), &cache::bulletSpeedNew, sizeof(float));
-				mem.AddScatterReadRequest(bulletHandle, (wdata + 0x1f34), &cache::bulletGravityNew, sizeof(float));
-
+				uintptr_t wdata = mem.Read<uintptr_t>(cache::privates[i] + offsets::CurrentWeapon);
+				mem.AddScatterReadRequest(bulletHandle, (wdata + 0x1d00), &cache::bulletSpeedNew, sizeof(float)); //ProjectileSpeed maybe = 0x1F30
+				mem.AddScatterReadRequest(bulletHandle, (wdata + 0x1d04), &cache::bulletGravityNew, sizeof(float)); //ProjectileGravity maybe = 0x1F34
+				
+					//203c
 				//std::cout << static_cast<int>(mem.Read<float>(cache::cachedWd[i] + 0x1aa0));
 			}
 			weaponName(i);

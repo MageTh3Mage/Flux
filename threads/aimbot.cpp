@@ -25,7 +25,7 @@ Vector3 godPrediction(Vector3 target, Vector3 velocity, float projectile_speed, 
 	//std::cout << gravity_scale << std::endl;
 	//std::cout << target.z << std::endl;
 	Vector3 newPos = target;
-	float time = distance / (projectile_speed/100);
+	float time = distance / (projectile_speed / 100);
 	newPos.x += velocity.x * time;
 	newPos.y += velocity.y * time;
 	newPos.z += velocity.z * time;
@@ -48,9 +48,10 @@ void fullReset() {
 
 void aimbot() {
 	if (!enableWebSocketAim) return;
-	ConnectAim("tcp://192.168.50.123:12345"); // hypr
-	//ConnectAim("tcp://192.168.1.141:12345"); // zerky
-	//ConnectAim("tcp://192.168.1.244:12345"); // mage
+	//ConnectAim("tcp://192.168.50.123:12345"); // hypr
+	//ConnectAim("tcp://192.168.1.177:12345"); // zerky
+	ConnectAim("tcp://192.168.1.244:12345"); // mage
+	//ConnectAim("tcp://192.168.0.89:12345"); //loxy
 
 	while (true) {
 		if (!settings::aimbot) {
@@ -62,18 +63,24 @@ void aimbot() {
 				if (settings::VisCheck && !IsVisible(closestPlayer::closest_player_mesh)) {
 					fullReset();
 					continue;
-				}	
+				}
 				globals::readGlobals = false;
 				Vector3 roothead = GetBoneWithRotation(closestPlayer::closest_player_mesh, 67);
-				roothead.z += settings::offset;
-				GetCameraInfo();
-
 				
-				Vector3 velocity = mem.Read<Vector3>(closestPlayer::root_component + offsets::Velocity);
+				roothead.z += settings::offset;
+				get_view_point();
+				Vector3 output;
+				if (cache::bulletSpeed == 0 || cache::bulletGravity == 0) {
+					output = roothead;
+				}
+				else {
+					Vector3 velocity = mem.Read<Vector3>(closestPlayer::root_component + offsets::Velocity);
 
-				Vector3 predictedPos = godPrediction(roothead, velocity, cache::bulletSpeed, cache::bulletGravity, closestPlayer::closest_player_distance);
+					output = godPrediction(roothead, velocity, cache::bulletSpeed, cache::bulletGravity, closestPlayer::closest_player_distance);
 
-				Vector3 rootHead2D = ProjectWorldToScreen(predictedPos);
+				}
+
+				Vector3 rootHead2D = ProjectWorldToScreen(output);
 				int dx = customRound((rootHead2D.x - 960) / static_cast<float>(settings::smoothing));
 				int dy = customRound((rootHead2D.y - 540) / static_cast<float>(settings::smoothing));
 				float dist = sqrtf(dx * dx + dy * dy);
@@ -87,7 +94,7 @@ void aimbot() {
 				std::string aimAt = xString + "," + yString;
 				SendAim(aimAt);
 			}
-			
+
 		}
 		else {
 			fullReset();
