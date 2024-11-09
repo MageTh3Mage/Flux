@@ -28,7 +28,7 @@ __forceinline std::string username(__int64 player)
 	//int xa = 0;
 	//while (true) {
 	//	xa = xa + 4;
-	//	__int64 Name = mem.Read<__int64>(player + 2712);
+	//	__int64 Name = mem.Read<__int64>(player + 2768);
 	//	if (Name == 0 || xa > 1000000) continue;
 	//	int Length = mem.Read<int>(Name + 16i64);
 	//	__int64 v6 = Length;
@@ -69,7 +69,7 @@ __forceinline std::string username(__int64 player)
 	//	std::cout << std::string(Temp.begin(), Temp.end());
 	//}
 
-	__int64 Name = mem.Read<__int64>(player + 2712);
+	__int64 Name = mem.Read<__int64>(player + 2768);
 	if (!Name) return std::string("bot/AI");
 	int Length = mem.Read<int>(Name + 16i64);
 	__int64 v6 = Length;
@@ -201,7 +201,7 @@ void esp() {
 		VMMDLL_SCATTER_HANDLE arrayHandle = mem.CreateScatterHandle();
 		for (int i = 0; i < globals::Num; i++) {
 			if (cache::meshes[i] == (uint64_t)nullptr) continue;
-			
+			//mem.AddScatterReadRequest(arrayHandle, (cache::meshes[i] + offsets::LastSubmitTime), &cache::last_submit_time_on_screen[i], sizeof(float));
 			mem.AddScatterReadRequest(arrayHandle, (cache::meshes[i] + offsets::BoneArray), &cache::boneArray[i], sizeof(uint64_t));
 			mem.AddScatterReadRequest(arrayHandle, (cache::meshes[i] + offsets::ComponetToWorld), &cache::componentToWorld[i], sizeof(FTransform));
 			mem.AddScatterReadRequest(arrayHandle, (cache::privates[i] + offsets::CurrentWeapon), &cache::cachedWd[i], sizeof(uintptr_t)); // https://dumpspace.spuckwaffel.com/Games/?hash=6b77eceb&type=classes&idx=AFortPawn&member=CurrentWeapon
@@ -352,7 +352,7 @@ void esp() {
 				string = string + std::to_string(cache::allBoneW2S[i][currentBone].y) + ",";
 			}
 			int o = 1;
-			if (IsVisible(cache::meshes[i]) == true) o = 1;
+			if (is_entity_visible(i) == true) o = 1;
 			else o = 0;
 			string = string + std::to_string(cache::distances[i]) + "," + std::to_string(o) + ",";
 
@@ -374,6 +374,7 @@ void esp() {
 			closestPlayer::closest_player_distance = cache::distances[closestPlayerIndex];
 			closestPlayer::closest_player_private = cache::privates[closestPlayerIndex];
 			closestPlayer::closest_player_mesh = cache::meshes[closestPlayerIndex];
+			closestPlayer::index = closestPlayerIndex;
 			closestPlayer::root_component = mem.Read<uintptr_t>(closestPlayer::closest_player_private + offsets::RootComponent);
 		}
 		

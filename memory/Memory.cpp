@@ -411,11 +411,12 @@ struct Info
 	std::string name;
 };
 
-PVMMDLL_MAP_MODULEENTRY module_entry;
+
 bool first = true;
 const size_t buffer_size = cbSize;
 std::unique_ptr<BYTE[]> bytes(new BYTE[buffer_size]);
 DWORD j = 0;
+unsigned long long currentdtb = 0;
 
 bool Memory::FixCr3()
 {
@@ -489,23 +490,62 @@ bool Memory::FixCr3()
 				possible_dtbs.push_back(info.dtb);
 		}
 	}
-
+	LOG("[?] Possible %llx ", (unsigned long long)possible_dtbs.size());
 	//loop over possible dtbs and set the config to use it til we find the correct one
-	for (size_t i = 0; i < possible_dtbs.size(); i = i + 1)
+	for (size_t i = 3; i < possible_dtbs.size(); i = i + 1)
 	{
 		auto dtb = possible_dtbs[i];
 		LOG("[?] possible DTB @ 0x%llx ", (unsigned long long)dtb);
-
+		if ((unsigned long long)dtb == currentdtb) continue;
 		VMMDLL_ConfigSet(this->vHandle, VMMDLL_OPT_PROCESS_DTB | this->current_process.PID, dtb);
+		
 		bool result = VMMDLL_Map_GetModuleFromNameU(this->vHandle, this->current_process.PID, (LPSTR)this->current_process.process_name.c_str(), &module_entry, NULL);
+		LOG("[+] Tried DTB @ 0x%llx ", (unsigned long long)dtb);
 		if (result)
 		{
 			LOG("[+] Patched DTB @ 0x%llx\n", (unsigned long long)dtb);
 			globals::CR3Fixed = true;
 			first = false;
+			currentdtb = (unsigned long long)dtb;
 			return true;
 		}
+		LOG("[+] Its not DTB @ 0x%llx\n", (unsigned long long)dtb);
 	}
+	for (size_t i = 0; i < possible_dtbs.size(); i = i + 1)
+	{
+		auto dtb = possible_dtbs[i];
+		LOG("[?] possible DTB @ 0x%llx ", (unsigned long long)dtb);
+		if ((unsigned long long)dtb == currentdtb) continue;
+		VMMDLL_ConfigSet(this->vHandle, VMMDLL_OPT_PROCESS_DTB | this->current_process.PID, dtb);
+
+		bool result = VMMDLL_Map_GetModuleFromNameU(this->vHandle, this->current_process.PID, (LPSTR)this->current_process.process_name.c_str(), &module_entry, NULL);
+		LOG("[+] Tried DTB @ 0x%llx ", (unsigned long long)dtb);
+		if (result)
+		{
+			LOG("[+] Patched DTB @ 0x%llx\n", (unsigned long long)dtb);
+			globals::CR3Fixed = true;
+			first = false;
+			currentdtb = (unsigned long long)dtb;
+			return true;
+		}
+		LOG("[+] Its not DTB @ 0x%llx\n", (unsigned long long)dtb);
+	}
+	/*auto dtb = possible_dtbs[0];
+	LOG("[?] possible DTB @ 0x%llx ", (unsigned long long)dtb);
+	VMMDLL_ConfigSet(this->vHandle, VMMDLL_OPT_PROCESS_DTB | this->current_process.PID, dtb);
+
+	bool result = VMMDLL_Map_GetModuleFromNameU(this->vHandle, this->current_process.PID, (LPSTR)this->current_process.process_name.c_str(), &module_entry, NULL);
+	LOG("[+] Tried DTB @ 0x%llx ", (unsigned long long)dtb);
+	if (result)
+	{
+		LOG("[+] Patched DTB @ 0x%llx\n", (unsigned long long)dtb);
+		globals::CR3Fixed = true;
+		first = false;
+		currentdtb = (unsigned long long)dtb;
+		return true;
+	}
+	LOG("[+] Its not DTB @ 0x%llx\n", (unsigned long long)dtb);*/
+
 
 	LOG("[-] Failed to patch module trying again\n");
 	globals::CR3Fixed = false;

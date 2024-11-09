@@ -44,13 +44,14 @@ void fullReset() {
 	closestPlayer::closest_player_distance = FLT_MAX;
 	closestPlayer::closest_player_private = 0;
 	closestPlayer::closest_player_mesh = 0;
+	closestPlayer::index = 0;
 }
 
 void aimbot() {
 	if (!enableWebSocketAim) return;
-	//ConnectAim("tcp://192.168.50.123:12345"); // hypr
-	//ConnectAim("tcp://192.168.1.177:12345"); // zerky
-	ConnectAim("tcp://192.168.1.244:12345"); // mage
+	ConnectAim("tcp://192.168.50.242:12345"); // hypr
+	//ConnectAim("tcp://192.168.1.178:12345"); // zerky
+	//ConnectAim("tcp://192.168.1.244:12345"); // mage
 	//ConnectAim("tcp://192.168.0.89:12345"); //loxy
 
 	while (true) {
@@ -60,7 +61,7 @@ void aimbot() {
 		}
 		if (Keyboard.IsKeyDown(settings::aimkeybind)) {
 			if (closestPlayer::closest_player_distance != FLT_MAX && closestPlayer::closest_player_private != 0 && closestPlayer::closest_player_mesh != 0) {
-				if (settings::VisCheck && !IsVisible(closestPlayer::closest_player_mesh)) {
+				if (settings::VisCheck && !is_entity_visible(closestPlayer::index)) {
 					fullReset();
 					continue;
 				}

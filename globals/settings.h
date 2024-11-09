@@ -6,8 +6,8 @@ namespace settings {
     inline bool enableOnScreenESP = false;
     inline bool aimbot = true;    
     inline int fov = 400;  
-    inline int aimkeybind = 0x05;  
-    inline int smoothing = 5.0f;
+    inline int aimkeybind = 0x02;  
+    inline int smoothing = 2.0f;
     inline int delay = 0;
     inline int offset = 0;
     inline bool TeamCheck = true;

@@ -3,6 +3,7 @@
 #include "offsets.h"
 #include "globals.h"
 #include "Memory.h"
+#include "cache.h"
 struct FPlane : Vector3
 {
 	double W;
@@ -132,6 +133,45 @@ Vector3 GetBoneWithRotation(uintptr_t mesh, int bone_id)
 	FTransform bone = mem.Read<FTransform>(bone_array + (bone_id * 0x60));
 	D3DMATRIX matrix = MatrixMultiplication(bone.ToMatrixWithScale(), component_to_world.ToMatrixWithScale());
 	return Vector3(matrix._41, matrix._42, matrix._43);
+}
+
+bool is_entity_visible(int i)
+{
+	/*float last_render_time_on_screen = mem.Read<float>(cache::meshes[i] + offsets::LastSubmitTime);*/
+	return cache::isVis[i];
+	
+}
+
+void visCheckLoop() {
+	while (true) {
+		VMMDLL_SCATTER_HANDLE arrayHandle = mem.CreateScatterHandle();
+		for (int i = 0; i < globals::Num; i++) {
+			if (cache::meshes[i] == (uint64_t)nullptr) continue;
+			mem.AddScatterReadRequest(arrayHandle, (cache::meshes[i] + offsets::LastSubmitTime), &cache::last_submit_time_on_screen[i], sizeof(float));
+		}
+		mem.ExecuteReadScatter(arrayHandle);
+		VMMDLL_Scatter_CloseHandle(arrayHandle);
+		Sleep(10);
+		VMMDLL_SCATTER_HANDLE arrayHandle2 = mem.CreateScatterHandle();
+		for (int i = 0; i < globals::Num; i++) {
+			if (cache::meshes[i] == (uint64_t)nullptr) continue;
+			mem.AddScatterReadRequest(arrayHandle2, (cache::meshes[i] + offsets::LastSubmitTime), &cache::last_submit_time_on_screen2[i], sizeof(float));
+		}
+		mem.ExecuteReadScatter(arrayHandle2);
+		VMMDLL_Scatter_CloseHandle(arrayHandle2);
+		for (int i = 0; i < globals::Num; i++) {
+
+			if (cache::last_submit_time_on_screen2[i] > cache::last_submit_time_on_screen[i])
+			{
+				cache::last_submit_time_on_screen[i] = cache::last_submit_time_on_screen2[i];
+				cache::isVis[i] = true;
+			}
+			else
+			{
+				cache::isVis[i] = false;
+			}
+		}
+	}
 }
 
 bool IsVisible(uintptr_t mesh)

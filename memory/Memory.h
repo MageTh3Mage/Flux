@@ -66,7 +66,7 @@ public:
 	*/
 	CurrentProcessInformation current_process { };
 	c_registry GetRegistry() { return registry; }
-
+	PVMMDLL_MAP_MODULEENTRY module_entry;
 	/**
 	* @brief Gets the key object
 	* @return key class

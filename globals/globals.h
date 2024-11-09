@@ -29,6 +29,7 @@ namespace globals {
 namespace closestPlayer {
     inline uintptr_t closest_player_private = 0;
     inline uintptr_t closest_player_mesh = 0;
+    inline int index = 0;
     inline uintptr_t root_component = 0;
     inline int closest_player_distance = FLT_MAX;
     inline float closest_distance_from_center = FLT_MAX;

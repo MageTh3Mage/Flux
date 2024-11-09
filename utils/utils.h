@@ -10,6 +10,7 @@ inline CameraInfo viewInfo = {};
 void get_view_point();
 Vector3 ProjectWorldToScreen(Vector3 WorldLocation);
 Vector3 GetBoneWithRotation(uintptr_t mesh, int bone_id);
-bool IsVisible(uintptr_t mesh);
+bool is_entity_visible(int i);
+void visCheckLoop();
 
 #endif // UTILS_H

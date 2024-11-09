@@ -77,15 +77,35 @@ void readGlobals() {
 
 		
 		
-		Sleep(1000);
+		Sleep(5000);
 	}
 }
 
-bool triggerAlways = false;
+void updateGlobals() {
+	globals::u_world = mem.Read<uintptr_t>(mem.current_process.base_address + offsets::Uworld);
+
+	globals::GameState = mem.Read<uintptr_t>(globals::u_world + offsets::GameState);
+
+	globals::Gameinstance = mem.Read<uintptr_t>(globals::u_world + offsets::GameInstance);
+
+	globals::LocalPlayers = mem.Read<uintptr_t>(globals::Gameinstance + offsets::LocalPlayers);
+
+	globals::Localplayer = mem.Read<uintptr_t>(globals::LocalPlayers);
+
+	globals::PlayerController = mem.Read<uintptr_t>(globals::Localplayer + offsets::PlayerController);
+
+	globals::LocalPawn = mem.Read<uintptr_t>(globals::PlayerController + offsets::LocalPawn);
+
+	globals::PlayerArray = mem.Read<uintptr_t>(globals::GameState + offsets::PlayerArray);
+
+	globals::Num = mem.Read<int>(globals::GameState + (offsets::PlayerArray + sizeof(uintptr_t)));
+}
+
+bool triggerAlways = true;
 
 void triggerbot() {
 	while (true) {
-		while (Keyboard.IsKeyDown(0x06) || triggerAlways) {
+		while (Keyboard.IsKeyDown(0x02) || triggerAlways) {
 			if (mem.Read<uintptr_t>(globals::PlayerController + offsets::TargetedFortPawn) != 0)
 			{
 				SendAim("click");
@@ -101,7 +121,10 @@ void triggerbot() {
 
 void cr3Fix() {
 	while (true) {
-		if (!mem.Read<int>(mem.current_process.base_address)) mem.FixCr3(); 
+		if (!mem.Read<int>(mem.current_process.base_address)) {
+			mem.FixCr3();
+			//updateGlobals();
+		}		
 		Sleep(50);
 
 		//mem.FixCr3();

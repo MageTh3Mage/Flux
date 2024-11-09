@@ -101,6 +101,10 @@ void ShowMenuWithSidebar()
 {
     ImGui::SetNextWindowSize(ImVec2(650, 340));
     ImGui::Begin("Flux DMA", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar);
+    if (!globals::CR3Fixed) {
+
+    ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0, 0), ImVec2(1920, 1080), ImGui::GetColorU32(ImVec4(1, 0, 0, 1)));
+    }
 
     // Sidebar child window
     ImGui::BeginChild("Sidebar", ImVec2(165, 0), true);
@@ -252,6 +256,7 @@ void ShowMenuWithSidebar()
     //int radarY = 300;
     int skeletonespthickness = esp_settings::skeleton_thickness;        
     ImVec4 skeletonColor = esp_settings::esp_color; // Use ESP color
+    ImVec4 skeletonColor2 = ImVec4(1, 0, 0, 1); // Use ESP color
     ImVec4 textColor = ImVec4(1, 1, 1, 1); // Use ESP color
     if (esp_settings::esp) {
         for (uint32_t i = 0; i < globals::Num; i++) {
@@ -262,7 +267,7 @@ void ShowMenuWithSidebar()
             //if (cache::privates[i] == globals::LocalPawn) continue;
             //if (cache::team[i] == globals::localTeam) continue;
             //if (cache::meshes[i] == (uintptr_t)nullptr) continue;
-            if (esp_settings::skeleton) {
+            if (esp_settings::skeleton && cache::isVis[i]) {
                 ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][0].x, cache::allBoneW2S[i][0].y), ImVec2(cache::allBoneW2S[i][2].x, cache::allBoneW2S[i][2].y), ImGui::GetColorU32(skeletonColor), skeletonespthickness);
                 ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][1].x, cache::allBoneW2S[i][1].y), ImVec2(cache::allBoneW2S[i][2].x, cache::allBoneW2S[i][2].y), ImGui::GetColorU32(skeletonColor), skeletonespthickness);
                 ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][3].x, cache::allBoneW2S[i][3].y), ImVec2(cache::allBoneW2S[i][2].x, cache::allBoneW2S[i][2].y), ImGui::GetColorU32(skeletonColor), skeletonespthickness);
@@ -277,6 +282,22 @@ void ShowMenuWithSidebar()
                 ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][11].x, cache::allBoneW2S[i][11].y), ImVec2(cache::allBoneW2S[i][9].x, cache::allBoneW2S[i][9].y), ImGui::GetColorU32(skeletonColor), skeletonespthickness);
                 ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][13].x, cache::allBoneW2S[i][13].y), ImVec2(cache::allBoneW2S[i][12].x, cache::allBoneW2S[i][12].y), ImGui::GetColorU32(skeletonColor), skeletonespthickness);
                 ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][14].x, cache::allBoneW2S[i][14].y), ImVec2(cache::allBoneW2S[i][11].x, cache::allBoneW2S[i][11].y), ImGui::GetColorU32(skeletonColor), skeletonespthickness);
+            }
+            if (esp_settings::skeleton && !cache::isVis[i]) {
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][0].x, cache::allBoneW2S[i][0].y), ImVec2(cache::allBoneW2S[i][2].x, cache::allBoneW2S[i][2].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][1].x, cache::allBoneW2S[i][1].y), ImVec2(cache::allBoneW2S[i][2].x, cache::allBoneW2S[i][2].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][3].x, cache::allBoneW2S[i][3].y), ImVec2(cache::allBoneW2S[i][2].x, cache::allBoneW2S[i][2].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][4].x, cache::allBoneW2S[i][4].y), ImVec2(cache::allBoneW2S[i][2].x, cache::allBoneW2S[i][2].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][5].x, cache::allBoneW2S[i][5].y), ImVec2(cache::allBoneW2S[i][3].x, cache::allBoneW2S[i][3].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][6].x, cache::allBoneW2S[i][6].y), ImVec2(cache::allBoneW2S[i][4].x, cache::allBoneW2S[i][4].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][5].x, cache::allBoneW2S[i][5].y), ImVec2(cache::allBoneW2S[i][7].x, cache::allBoneW2S[i][7].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][6].x, cache::allBoneW2S[i][6].y), ImVec2(cache::allBoneW2S[i][8].x, cache::allBoneW2S[i][8].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][10].x, cache::allBoneW2S[i][10].y), ImVec2(cache::allBoneW2S[i][1].x, cache::allBoneW2S[i][1].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][9].x, cache::allBoneW2S[i][9].y), ImVec2(cache::allBoneW2S[i][1].x, cache::allBoneW2S[i][1].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][12].x, cache::allBoneW2S[i][12].y), ImVec2(cache::allBoneW2S[i][10].x, cache::allBoneW2S[i][10].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][11].x, cache::allBoneW2S[i][11].y), ImVec2(cache::allBoneW2S[i][9].x, cache::allBoneW2S[i][9].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][13].x, cache::allBoneW2S[i][13].y), ImVec2(cache::allBoneW2S[i][12].x, cache::allBoneW2S[i][12].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
+                ImGui::GetBackgroundDrawList()->AddLine(ImVec2(cache::allBoneW2S[i][14].x, cache::allBoneW2S[i][14].y), ImVec2(cache::allBoneW2S[i][11].x, cache::allBoneW2S[i][11].y), ImGui::GetColorU32(skeletonColor2), skeletonespthickness);
             }
             if (esp_settings::distance) {
                 char distanceStr[64];
@@ -348,7 +369,7 @@ void ShowMenuWithSidebar()
 
             for (uint32_t i = 0; i < globals::Num; i++) {
 
-                if (cache::privates[i] == globals::LocalPawn || cache::headpos[i].x == 0 || cache::headpos[i].y == 0) continue;
+                //if (cache::privates[i] == globals::LocalPawn || cache::headpos[i].x == 0 || cache::headpos[i].y == 0) continue;
                 //char distanceStrRadar[64];
                 //snprintf(distanceStrRadar, sizeof(distanceStrRadar), "%0.fm", cache::distances[i]);
                 std::pair<int, int> newPoint = rotatePoint(-viewInfo.rotation.y, int((cache::localheadpos.y - cache::headpos[i].y) / 100) + 175, int((cache::headpos[i].x - cache::localheadpos.x) / 100) + 175);

@@ -29,6 +29,9 @@ namespace cache{
 	inline float bulletGravity;
 	inline float bulletSpeedNew;
 	inline float bulletGravityNew;
+	inline float last_submit_time_on_screen[1000];
+	inline float last_submit_time_on_screen2[1000];
+	inline bool isVis[1000];
 	inline std::string ign[1000] = {};
 	inline std::vector<std::vector<FTransform>> allBoneTransform(1000, std::vector<FTransform>(15));
 	inline std::vector<std::vector<Vector3>> allBoneW2S(1000, std::vector<Vector3>(15));
